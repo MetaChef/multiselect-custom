@@ -1,4 +1,5 @@
-import { toRefs, getCurrentInstance, ref, computed, watch, nextTick, onMounted, openBlock, createElementBlock, normalizeClass, createCommentVNode, mergeProps, withModifiers, Fragment, renderList, renderSlot, createTextVNode, toDisplayString, createElementVNode } from 'vue';
+import { toRefs, getCurrentInstance, ref, computed, watch, nextTick, onMounted, resolveComponent, openBlock, createElementBlock, normalizeClass, createCommentVNode, mergeProps, withModifiers, Fragment, renderList, renderSlot, createTextVNode, toDisplayString, createElementVNode, createBlock, withCtx } from 'vue';
+import { SimpleBar } from 'simplebar-vue3';
 
 function isNullish (val) {
   return [null, undefined].indexOf(val) !== -1
@@ -1957,6 +1958,9 @@ function resolveDeps (props, context, features, deps = {}) {
 
 var script = {
     name: 'Multiselect',
+    components: {
+      SimpleBar
+    },
     emits: [
       'paste', 'open', 'close', 'select', 'deselect', 
       'input', 'search-change', 'tag', 'option', 'update:modelValue',
@@ -2281,6 +2285,8 @@ const _hoisted_18 = ["name", "value"];
 const _hoisted_19 = ["name", "value"];
 
 function render(_ctx, _cache, $props, $setup, $data, $options) {
+  const _component_SimpleBar = resolveComponent("SimpleBar");
+
   return (openBlock(), createElementBlock("div", {
     ref: "multiselect",
     tabindex: _ctx.tabindex,
@@ -2523,30 +2529,38 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
                 ], 10 /* CLASS, PROPS */, _hoisted_10)
               ], 2 /* CLASS */))
             }), 128 /* KEYED_FRAGMENT */))
-          : (openBlock(true), createElementBlock(Fragment, { key: 1 }, renderList(_ctx.fo, (option, i, key) => {
-              return (openBlock(), createElementBlock("li", {
-                id: _ctx.ariaOptionId(option),
-                "aria-label": _ctx.ariaOptionLabel(option),
-                class: normalizeClass(_ctx.classList.option(option)),
-                key: key,
-                "data-pointed": _ctx.isPointed(option),
-                "data-selected": _ctx.isSelected(option) || undefined,
-                onMouseenter: $event => (_ctx.setPointer(option)),
-                onClick: $event => (_ctx.handleOptionClick(option)),
-                role: "option"
-              }, [
-                renderSlot(_ctx.$slots, "option", {
-                  option: option,
-                  isSelected: _ctx.isSelected,
-                  isPointed: _ctx.isPointed,
-                  search: _ctx.search
-                }, () => [
-                  createElementVNode("span", {
-                    innerHTML: option[$props.label]
-                  }, null, 8 /* PROPS */, _hoisted_14)
-                ])
-              ], 42 /* CLASS, PROPS, HYDRATE_EVENTS */, _hoisted_13))
-            }), 128 /* KEYED_FRAGMENT */))
+          : (openBlock(), createBlock(_component_SimpleBar, {
+              key: 1,
+              class: "px-10 py-9 min-h-0 w-full h-full flex-grow-1 block"
+            }, {
+              default: withCtx(() => [
+                (openBlock(true), createElementBlock(Fragment, null, renderList(_ctx.fo, (option, i, key) => {
+                  return (openBlock(), createElementBlock("li", {
+                    id: _ctx.ariaOptionId(option),
+                    "aria-label": _ctx.ariaOptionLabel(option),
+                    class: normalizeClass(_ctx.classList.option(option)),
+                    key: key,
+                    "data-pointed": _ctx.isPointed(option),
+                    "data-selected": _ctx.isSelected(option) || undefined,
+                    onMouseenter: $event => (_ctx.setPointer(option)),
+                    onClick: $event => (_ctx.handleOptionClick(option)),
+                    role: "option"
+                  }, [
+                    renderSlot(_ctx.$slots, "option", {
+                      option: option,
+                      isSelected: _ctx.isSelected,
+                      isPointed: _ctx.isPointed,
+                      search: _ctx.search
+                    }, () => [
+                      createElementVNode("span", {
+                        innerHTML: option[$props.label]
+                      }, null, 8 /* PROPS */, _hoisted_14)
+                    ])
+                  ], 42 /* CLASS, PROPS, HYDRATE_EVENTS */, _hoisted_13))
+                }), 128 /* KEYED_FRAGMENT */))
+              ]),
+              _: 3 /* FORWARDED */
+            }))
       ], 10 /* CLASS, PROPS */, _hoisted_7),
       (_ctx.noOptions)
         ? renderSlot(_ctx.$slots, "nooptions", { key: 0 }, () => [

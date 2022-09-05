@@ -184,22 +184,24 @@
           </li>
         </template>
         <template v-else>
-          <li
-            v-for="(option, i, key) in fo"
-            :id="ariaOptionId(option)"
-            :aria-label="ariaOptionLabel(option)"
-            :class="classList.option(option)"
-            :key="key"
-            :data-pointed="isPointed(option)"
-            :data-selected="isSelected(option) || undefined"
-            @mouseenter="setPointer(option)"
-            @click="handleOptionClick(option)"
-            role="option"
-          >
-            <slot name="option" :option="option" :isSelected="isSelected" :is-pointed="isPointed" :search="search">
-              <span v-html="option[label]"></span>
-            </slot>
-          </li>
+          <SimpleBar class="px-10 py-9 min-h-0 w-full h-full flex-grow-1 block">
+            <li
+              v-for="(option, i, key) in fo"
+              :id="ariaOptionId(option)"
+              :aria-label="ariaOptionLabel(option)"
+              :class="classList.option(option)"
+              :key="key"
+              :data-pointed="isPointed(option)"
+              :data-selected="isSelected(option) || undefined"
+              @mouseenter="setPointer(option)"
+              @click="handleOptionClick(option)"
+              role="option"
+            >
+              <slot name="option" :option="option" :isSelected="isSelected" :is-pointed="isPointed" :search="search">
+                <span v-html="option[label]"></span>
+              </slot>
+            </li>
+          </SimpleBar>
         </template>
       </ul>
 
@@ -249,12 +251,15 @@
   import useKeyboard from './composables/useKeyboard' 
   import useClasses from './composables/useClasses' 
   import useScroll from './composables/useScroll' 
-  import useA11y from './composables/useA11y' 
-
+  import useA11y from './composables/useA11y'
+  import { SimpleBar } from "simplebar-vue3"
   import resolveDeps from './utils/resolveDeps'
 
   export default {
     name: 'Multiselect',
+    components: {
+      SimpleBar
+    },
     emits: [
       'paste', 'open', 'close', 'select', 'deselect', 
       'input', 'search-change', 'tag', 'option', 'update:modelValue',
