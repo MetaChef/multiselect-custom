@@ -65,6 +65,7 @@
     "not dead"
   ],
   "dependencies": {
-    "simplebar-vue": "^1.6.9"
+    "simplebar": "^5.3.6",
+    "simplebar-vue3": "^0.1.6"
   }
 }
