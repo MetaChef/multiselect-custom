@@ -140,7 +140,7 @@
     >
       <slot name="beforelist" :options="fo"></slot>
 
-      <ul :class="classList.options " class="listsimplebar" style="max-height:15rem;" :id="ariaOwns" role="listbox">
+      <ul :class="classList.options "  style="max-height:15rem;" :id="ariaOwns" role="listbox">
         <template v-if="groups">
           <li
             v-for="(group, i, key) in fg"
@@ -184,24 +184,26 @@
           </li>
         </template>
         <template v-else>
-          <SimpleBar class="px-0 py-0 w-full h-full relative overflow-y-auto inline-block pr-4">
-            <li
-              v-for="(option, i, key) in fo"
-              :id="ariaOptionId(option)"
-              :aria-label="ariaOptionLabel(option)"
-              :class="classList.option(option)"
-              :key="key"
-              :data-pointed="isPointed(option)"
-              :data-selected="isSelected(option) || undefined"
-              @mouseenter="setPointer(option)"
-              @click="handleOptionClick(option)"
-              role="option"
-            >
-              <slot name="option" :option="option" :isSelected="isSelected" :is-pointed="isPointed" :search="search">
-                <span v-html="option[label]"></span>
-              </slot>
-            </li>
-          </SimpleBar>
+          <div class="listsimplebar">
+            <SimpleBar class="px-0 py-0 w-full h-full relative overflow-y-auto inline-block pr-4">
+              <li
+                v-for="(option, i, key) in fo"
+                :id="ariaOptionId(option)"
+                :aria-label="ariaOptionLabel(option)"
+                :class="classList.option(option)"
+                :key="key"
+                :data-pointed="isPointed(option)"
+                :data-selected="isSelected(option) || undefined"
+                @mouseenter="setPointer(option)"
+                @click="handleOptionClick(option)"
+                role="option"
+              >
+                <slot name="option" :option="option" :isSelected="isSelected" :is-pointed="isPointed" :search="search">
+                  <span v-html="option[label]"></span>
+                </slot>
+              </li>
+            </SimpleBar>
+          </div>
         </template>
       </ul>
 
