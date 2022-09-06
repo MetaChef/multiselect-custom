@@ -159,12 +159,47 @@
               </slot>
             </div>
 
+            <ul
+              :class="classList.groupOptions"
+              :aria-label="ariaGroupLabel(group)"
+              role="group"
+            >
+              <li
+                v-for="(option, i, key) in group.__VISIBLE__"
+                :class="classList.option(option, group)"
+                :key="key"
+                :data-pointed="isPointed(option)"
+                :data-selected="isSelected(option) || undefined"
+                :id="ariaOptionId(option)"
+                :aria-label="ariaOptionLabel(option)"
+                @mouseenter="setPointer(option)"
+                @click="handleOptionClick(option)"
+                role="option"
+              >
+                <slot name="option" :option="option" :is-selected="isSelected" :is-pointed="isPointed" :search="search">
+                  <span v-html="option[label]"></span>
+                </slot>
+              </li>
+            </ul>
           </li>
         </template>
         <template v-else>
-          <SimpleBar class="min-h-0 w-full h-full overflow-y-auto flex-grow-1 block">
-
-          </SimpleBar>
+          <li
+            v-for="(option, i, key) in fo"
+            :id="ariaOptionId(option)"
+            :aria-label="ariaOptionLabel(option)"
+            :class="classList.option(option)"
+            :key="key"
+            :data-pointed="isPointed(option)"
+            :data-selected="isSelected(option) || undefined"
+            @mouseenter="setPointer(option)"
+            @click="handleOptionClick(option)"
+            role="option"
+          >
+            <slot name="option" :option="option" :isSelected="isSelected" :is-pointed="isPointed" :search="search">
+              <span v-html="option[label]"></span>
+            </slot>
+          </li>
         </template>
       </ul>
 
