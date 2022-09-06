@@ -293,7 +293,6 @@
   z-index: 100;
   background: var(--ms-dropdown-bg, #FFFFFF);
   display: flex;
-  overflow-y: auto;
   flex-direction: column;
   border-radius: 0 0 var(--ms-dropdown-radius, 4px) var(--ms-dropdown-radius, 4px);
   border-top-width: 0px;
@@ -320,7 +319,11 @@
   list-style: none;
   display: flex;
   flex-direction: column;
+  max-height: 15rem;
+  max-height: var(--ms-max-height, 10rem);
 }
+
+.listsimplebar .simplebar-content { padding:0 !important;}
 
 .multiselect-group {
   padding: 0;
