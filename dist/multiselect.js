@@ -2472,6 +2472,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       renderSlot(_ctx.$slots, "beforelist", { options: _ctx.fo }),
       createElementVNode("ul", {
         class: normalizeClass(_ctx.classList.options),
+        style: {"max-height":"15rem"},
         id: _ctx.ariaOwns,
         role: "listbox"
       }, [
@@ -2532,7 +2533,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
             }), 128 /* KEYED_FRAGMENT */))
           : (openBlock(), createBlock(_component_SimpleBar, {
               key: 1,
-              class: "w-full h-full relative overflow-y-auto inline-block pr-4"
+              class: "listsimplebar px-0 py-0 w-full h-full relative overflow-y-auto inline-block pr-4"
             }, {
               default: withCtx(() => [
                 (openBlock(true), createElementBlock(Fragment, null, renderList(_ctx.fo, (option, i, key) => {

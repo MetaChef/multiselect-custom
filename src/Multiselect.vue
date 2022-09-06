@@ -184,7 +184,7 @@
           </li>
         </template>
         <template v-else>
-          <SimpleBar class="listsimplebar w-full h-full relative overflow-y-auto inline-block pr-4">
+          <SimpleBar class="listsimplebar px-0 py-0 w-full h-full relative overflow-y-auto inline-block pr-4">
             <li
               v-for="(option, i, key) in fo"
               :id="ariaOptionId(option)"
