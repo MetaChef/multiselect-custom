@@ -140,7 +140,7 @@
     >
       <slot name="beforelist" :options="fo"></slot>
 
-      <ul :class="classList.options" style="max-height:15rem;" :id="ariaOwns" role="listbox">
+      <ul :class="classList.options " class="listsimplebar" style="max-height:15rem;" :id="ariaOwns" role="listbox">
         <template v-if="groups">
           <li
             v-for="(group, i, key) in fg"
@@ -184,7 +184,7 @@
           </li>
         </template>
         <template v-else>
-          <SimpleBar class="listsimplebar px-0 py-0 w-full h-full relative overflow-y-auto inline-block pr-4">
+          <SimpleBar class="px-0 py-0 w-full h-full relative overflow-y-auto inline-block pr-4">
             <li
               v-for="(option, i, key) in fo"
               :id="ariaOptionId(option)"
