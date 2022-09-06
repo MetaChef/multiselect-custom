@@ -159,28 +159,6 @@
               </slot>
             </div>
 
-            <ul
-              :class="classList.groupOptions"
-              :aria-label="ariaGroupLabel(group)"
-              role="group"
-            >
-              <li
-                v-for="(option, i, key) in group.__VISIBLE__"
-                :class="classList.option(option, group)"
-                :key="key"
-                :data-pointed="isPointed(option)"
-                :data-selected="isSelected(option) || undefined"
-                :id="ariaOptionId(option)"
-                :aria-label="ariaOptionLabel(option)"
-                @mouseenter="setPointer(option)"
-                @click="handleOptionClick(option)"
-                role="option"
-              >
-                <slot name="option" :option="option" :is-selected="isSelected" :is-pointed="isPointed" :search="search">
-                  <span v-html="option[label]"></span>
-                </slot>
-              </li>
-            </ul>
           </li>
         </template>
         <template v-else>
