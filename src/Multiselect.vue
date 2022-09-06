@@ -184,22 +184,24 @@
           </li>
         </template>
         <template v-else>
-          <li
-            v-for="(option, i, key) in fo"
-            :id="ariaOptionId(option)"
-            :aria-label="ariaOptionLabel(option)"
-            :class="classList.option(option)"
-            :key="key"
-            :data-pointed="isPointed(option)"
-            :data-selected="isSelected(option) || undefined"
-            @mouseenter="setPointer(option)"
-            @click="handleOptionClick(option)"
-            role="option"
-          >
-            <slot name="option" :option="option" :isSelected="isSelected" :is-pointed="isPointed" :search="search">
-              <span v-html="option[label]"></span>
-            </slot>
-          </li>
+          <SimpleBar class="w-full h-full relative overflow-y-auto inline-block pr-4">
+            <li
+              v-for="(option, i, key) in fo"
+              :id="ariaOptionId(option)"
+              :aria-label="ariaOptionLabel(option)"
+              :class="classList.option(option)"
+              :key="key"
+              :data-pointed="isPointed(option)"
+              :data-selected="isSelected(option) || undefined"
+              @mouseenter="setPointer(option)"
+              @click="handleOptionClick(option)"
+              role="option"
+            >
+              <slot name="option" :option="option" :isSelected="isSelected" :is-pointed="isPointed" :search="search">
+                <span v-html="option[label]"></span>
+              </slot>
+            </li>
+          </SimpleBar>
         </template>
       </ul>
 
@@ -251,6 +253,7 @@
   import useScroll from './composables/useScroll' 
   import useA11y from './composables/useA11y'
   import { SimpleBar } from "simplebar-vue3"
+  import "simplebar/dist/simplebar.min.css"
   import resolveDeps from './utils/resolveDeps'
 
   export default {

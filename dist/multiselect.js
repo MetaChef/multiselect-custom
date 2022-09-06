@@ -1,5 +1,6 @@
-import { toRefs, getCurrentInstance, ref, computed, watch, nextTick, onMounted, resolveComponent, openBlock, createElementBlock, normalizeClass, createCommentVNode, mergeProps, withModifiers, Fragment, renderList, renderSlot, createTextVNode, toDisplayString, createElementVNode, createBlock } from 'vue';
+import { toRefs, getCurrentInstance, ref, computed, watch, nextTick, onMounted, resolveComponent, openBlock, createElementBlock, normalizeClass, createCommentVNode, mergeProps, withModifiers, Fragment, renderList, renderSlot, createTextVNode, toDisplayString, createElementVNode, createBlock, withCtx } from 'vue';
 import { SimpleBar } from 'simplebar-vue3';
+import 'simplebar/dist/simplebar.min.css';
 
 function isNullish (val) {
   return [null, undefined].indexOf(val) !== -1
@@ -2273,11 +2274,16 @@ const _hoisted_6 = ["innerHTML"];
 const _hoisted_7 = ["id"];
 const _hoisted_8 = ["data-pointed", "onMouseenter", "onClick"];
 const _hoisted_9 = ["innerHTML"];
-const _hoisted_10 = ["innerHTML"];
-const _hoisted_11 = ["innerHTML"];
-const _hoisted_12 = ["value"];
-const _hoisted_13 = ["name", "value"];
-const _hoisted_14 = ["name", "value"];
+const _hoisted_10 = ["aria-label"];
+const _hoisted_11 = ["data-pointed", "data-selected", "id", "aria-label", "onMouseenter", "onClick"];
+const _hoisted_12 = ["innerHTML"];
+const _hoisted_13 = ["id", "aria-label", "data-pointed", "data-selected", "onMouseenter", "onClick"];
+const _hoisted_14 = ["innerHTML"];
+const _hoisted_15 = ["innerHTML"];
+const _hoisted_16 = ["innerHTML"];
+const _hoisted_17 = ["value"];
+const _hoisted_18 = ["name", "value"];
+const _hoisted_19 = ["name", "value"];
 
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   const _component_SimpleBar = resolveComponent("SimpleBar");
@@ -2491,12 +2497,70 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
                       innerHTML: group[$props.groupLabel]
                     }, null, 8 /* PROPS */, _hoisted_9)
                   ])
-                ], 42 /* CLASS, PROPS, HYDRATE_EVENTS */, _hoisted_8)
+                ], 42 /* CLASS, PROPS, HYDRATE_EVENTS */, _hoisted_8),
+                createElementVNode("ul", {
+                  class: normalizeClass(_ctx.classList.groupOptions),
+                  "aria-label": _ctx.ariaGroupLabel(group),
+                  role: "group"
+                }, [
+                  (openBlock(true), createElementBlock(Fragment, null, renderList(group.__VISIBLE__, (option, i, key) => {
+                    return (openBlock(), createElementBlock("li", {
+                      class: normalizeClass(_ctx.classList.option(option, group)),
+                      key: key,
+                      "data-pointed": _ctx.isPointed(option),
+                      "data-selected": _ctx.isSelected(option) || undefined,
+                      id: _ctx.ariaOptionId(option),
+                      "aria-label": _ctx.ariaOptionLabel(option),
+                      onMouseenter: $event => (_ctx.setPointer(option)),
+                      onClick: $event => (_ctx.handleOptionClick(option)),
+                      role: "option"
+                    }, [
+                      renderSlot(_ctx.$slots, "option", {
+                        option: option,
+                        isSelected: _ctx.isSelected,
+                        isPointed: _ctx.isPointed,
+                        search: _ctx.search
+                      }, () => [
+                        createElementVNode("span", {
+                          innerHTML: option[$props.label]
+                        }, null, 8 /* PROPS */, _hoisted_12)
+                      ])
+                    ], 42 /* CLASS, PROPS, HYDRATE_EVENTS */, _hoisted_11))
+                  }), 128 /* KEYED_FRAGMENT */))
+                ], 10 /* CLASS, PROPS */, _hoisted_10)
               ], 2 /* CLASS */))
             }), 128 /* KEYED_FRAGMENT */))
           : (openBlock(), createBlock(_component_SimpleBar, {
               key: 1,
-              class: "min-h-0 w-full h-full overflow-y-auto flex-grow-1 block"
+              class: "w-full h-full relative overflow-y-auto inline-block pr-4"
+            }, {
+              default: withCtx(() => [
+                (openBlock(true), createElementBlock(Fragment, null, renderList(_ctx.fo, (option, i, key) => {
+                  return (openBlock(), createElementBlock("li", {
+                    id: _ctx.ariaOptionId(option),
+                    "aria-label": _ctx.ariaOptionLabel(option),
+                    class: normalizeClass(_ctx.classList.option(option)),
+                    key: key,
+                    "data-pointed": _ctx.isPointed(option),
+                    "data-selected": _ctx.isSelected(option) || undefined,
+                    onMouseenter: $event => (_ctx.setPointer(option)),
+                    onClick: $event => (_ctx.handleOptionClick(option)),
+                    role: "option"
+                  }, [
+                    renderSlot(_ctx.$slots, "option", {
+                      option: option,
+                      isSelected: _ctx.isSelected,
+                      isPointed: _ctx.isPointed,
+                      search: _ctx.search
+                    }, () => [
+                      createElementVNode("span", {
+                        innerHTML: option[$props.label]
+                      }, null, 8 /* PROPS */, _hoisted_14)
+                    ])
+                  ], 42 /* CLASS, PROPS, HYDRATE_EVENTS */, _hoisted_13))
+                }), 128 /* KEYED_FRAGMENT */))
+              ]),
+              _: 3 /* FORWARDED */
             }))
       ], 10 /* CLASS, PROPS */, _hoisted_7),
       (_ctx.noOptions)
@@ -2504,7 +2568,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
             createElementVNode("div", {
               class: normalizeClass(_ctx.classList.noOptions),
               innerHTML: $props.noOptionsText
-            }, null, 10 /* CLASS, PROPS */, _hoisted_10)
+            }, null, 10 /* CLASS, PROPS */, _hoisted_15)
           ])
         : createCommentVNode("v-if", true),
       (_ctx.noResults)
@@ -2512,7 +2576,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
             createElementVNode("div", {
               class: normalizeClass(_ctx.classList.noResults),
               innerHTML: $props.noResultsText
-            }, null, 10 /* CLASS, PROPS */, _hoisted_11)
+            }, null, 10 /* CLASS, PROPS */, _hoisted_16)
           ])
         : createCommentVNode("v-if", true),
       ($props.infinite && _ctx.hasMore)
@@ -2538,7 +2602,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
           tabindex: "-1",
           value: _ctx.textValue,
           required: ""
-        }, null, 10 /* CLASS, PROPS */, _hoisted_12))
+        }, null, 10 /* CLASS, PROPS */, _hoisted_17))
       : createCommentVNode("v-if", true),
     createCommentVNode(" Native input support "),
     ($props.nativeSupport)
@@ -2549,14 +2613,14 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
                 type: "hidden",
                 name: $props.name,
                 value: _ctx.plainValue !== undefined ? _ctx.plainValue : ''
-              }, null, 8 /* PROPS */, _hoisted_13))
+              }, null, 8 /* PROPS */, _hoisted_18))
             : (openBlock(true), createElementBlock(Fragment, { key: 1 }, renderList(_ctx.plainValue, (v, i) => {
                 return (openBlock(), createElementBlock("input", {
                   type: "hidden",
                   name: `${$props.name}[]`,
                   value: v,
                   key: i
-                }, null, 8 /* PROPS */, _hoisted_14))
+                }, null, 8 /* PROPS */, _hoisted_19))
               }), 128 /* KEYED_FRAGMENT */))
         ], 64 /* STABLE_FRAGMENT */))
       : createCommentVNode("v-if", true),
