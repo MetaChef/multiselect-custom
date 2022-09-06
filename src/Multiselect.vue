@@ -140,7 +140,7 @@
     >
       <slot name="beforelist" :options="fo"></slot>
 
-      <ul :class="classList.options" :id="ariaOwns" role="listbox">
+      <ul :class="classList.options" style="max-height:15rem;" :id="ariaOwns" role="listbox">
         <template v-if="groups">
           <li
             v-for="(group, i, key) in fg"
