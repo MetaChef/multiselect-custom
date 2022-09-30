@@ -325,12 +325,12 @@
 
 .listsimplebar .simplebar-content { 
   padding:0 !important;
-  max-height: 15rem;
-  max-height: var(--ms-max-height, 10rem);
+  max-height: 6rem;
+  max-height: var(--ms-max-height, 6rem);
 }
 .listsimplebar .simplebar-placeholder {
-  max-height: 15rem;
-  max-height: var(--ms-max-height, 10rem);
+  max-height: 6rem;
+  max-height: var(--ms-max-height, 6rem);
 }
 .multiselect-group {
   padding: 0;
