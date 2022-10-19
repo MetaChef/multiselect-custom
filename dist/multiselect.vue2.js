@@ -315,11 +315,12 @@ function useOptions (props, context, dep)
       return []
     }
 
-    return filterGroups((ro.value || /* istanbul ignore next */ []).map((group) => {
+    return filterGroups((ro.value || /* istanbul ignore next */ []).map((group, index) => {
       const arrayOptions = optionsToArray(group[groupOptions.value]);
 
       return {
         ...group,
+        index,
         group: true,
         [groupOptions.value]: filterOptions(arrayOptions, false).map(o => Object.assign({}, o, group[disabledProp.value] ? { [disabledProp.value]: true } : {})),
         __VISIBLE__: filterOptions(arrayOptions).map(o => Object.assign({}, o, group[disabledProp.value] ? { [disabledProp.value]: true } : {})),
@@ -942,7 +943,7 @@ function useOptions (props, context, dep)
 
   watch(options, (n, o) => {
     if (typeof props.options === 'function') {
-      if (resolveOnLoad.value) {
+      if (resolveOnLoad.value && (!o || (n && n.toString() !== o.toString()))) {
         resolveOptions();
       }
     } else {
@@ -1088,8 +1089,8 @@ function usePointer (props, context, dep)
 
   const isPointed = (option) => {
     return (!!pointer.value && (
-      (!option.group && pointer.value[valueProp.value] == option[valueProp.value]) ||
-      (option.group !== undefined && pointer.value[groupLabel.value] == option[groupLabel.value])
+      (!option.group && pointer.value[valueProp.value] == option[valueProp.value]) ||
+      (option.group !== undefined && pointer.value[groupLabel.value] == option[groupLabel.value])
     )) ? true : undefined
   };
 
@@ -1301,9 +1302,12 @@ function useMultiselect (props, context, dep)
   // ================ DATA ================
 
   const multiselect = ref(null);
+
   const tags = ref(null);
 
   const isActive = ref(false);
+
+  const mouseClicked = ref(false);
 
   // ============== COMPUTED ==============
 
@@ -1327,18 +1331,16 @@ function useMultiselect (props, context, dep)
     }
   };
 
-  const handleFocus = () => {
-    focus();
-  };
-
-  const activate = () => {
+  const activate = (shouldOpen = true) => {
     if (disabled.value) {
       return
     }
 
     isActive.value = true;
 
-    open();
+    if (shouldOpen) {
+      open();
+    }
   };
 
   const deactivate = () => {
@@ -1352,6 +1354,14 @@ function useMultiselect (props, context, dep)
     }, 1);
   };
 
+  const handleFocusIn = () => {
+    activate(mouseClicked.value);
+  };
+
+  const handleFocusOut = () => {
+    deactivate();
+  };
+
   const handleCaretClick = () => {
     deactivate();
     blur();
@@ -1359,6 +1369,8 @@ function useMultiselect (props, context, dep)
 
   /* istanbul ignore next */
   const handleMousedown = (e) => {
+    mouseClicked.value = true;
+
     if (isOpen.value && (e.target.isEqualNode(multiselect.value) || e.target.isEqualNode(tags.value))) {
       setTimeout(() => {
         deactivate();
@@ -1366,6 +1378,10 @@ function useMultiselect (props, context, dep)
     } else if (document.activeElement.isEqualNode(multiselect.value) && !isOpen.value) {
       activate();    
     }
+
+    setTimeout(() => {
+      mouseClicked.value = false;
+    }, 0);
   };
 
   return {
@@ -1373,11 +1389,13 @@ function useMultiselect (props, context, dep)
     tags,
     tabindex,
     isActive,
+    mouseClicked,
     blur,
     focus,
-    handleFocus,
     activate,
     deactivate,
+    handleFocusIn,
+    handleFocusOut,
     handleCaretClick,
     handleMousedown,
   }
@@ -1403,6 +1421,8 @@ function useKeyboard (props, context, dep)
   const selectPointer = dep.selectPointer;
   const backwardPointer = dep.backwardPointer;
   const forwardPointer = dep.forwardPointer;
+  const multiselect = dep.multiselect;
+  const tags = dep.tags;
   const isOpen = dep.isOpen;
   const open = dep.open;
   const blur = dep.blur;
@@ -1444,6 +1464,14 @@ function useKeyboard (props, context, dep)
   const handleKeydown = (e) => {
     context.emit('keydown', e, $this);
 
+    let tagList;
+    let activeIndex;
+
+    if (['ArrowLeft', 'ArrowRight', 'Enter'].indexOf(e.key) !== -1 && mode.value === 'tags') {
+      tagList = [...(multiselect.value.querySelectorAll(`[data-tags] > *`))].filter(e => e !== tags.value);
+      activeIndex = tagList.findIndex(e => e === document.activeElement);
+    }
+
     switch (e.key) {
       case 'Backspace':
         if (mode.value === 'single') {
@@ -1463,6 +1491,21 @@ function useKeyboard (props, context, dep)
 
       case 'Enter':
         e.preventDefault();
+
+        if (activeIndex !== -1 && activeIndex !== undefined) {
+          update([...iv.value].filter((v, k) => k !== activeIndex));
+
+          if (activeIndex === tagList.length - 1) {
+            if (tagList.length - 1) {
+              tagList[tagList.length - 2].focus();
+            } else if (searchable.value) {
+              tags.value.querySelector('input').focus();
+            } else {
+              multiselect.value.focus();
+            }
+          }
+          return
+        }
 
         if (addOptionOn.value.indexOf('enter') === -1 && createOption.value) {
           return
@@ -1539,6 +1582,41 @@ function useKeyboard (props, context, dep)
         }
 
         forwardPointer();
+        break
+
+      case 'ArrowLeft':
+        if ((searchable.value && tags.value.querySelector('input').selectionStart) || e.shiftKey || mode.value !== 'tags' || !iv.value || !iv.value.length) {
+          return
+        }
+
+        e.preventDefault();
+
+        if (activeIndex === -1) {
+          tagList[tagList.length-1].focus();
+        }
+        else if (activeIndex > 0) {
+          tagList[activeIndex-1].focus();
+        }
+        break
+
+      case 'ArrowRight':
+        if (activeIndex === -1 || e.shiftKey || mode.value !== 'tags' || !iv.value || !iv.value.length) {
+          return
+        }
+
+        e.preventDefault();
+        
+        /* istanbul ignore else */
+        if (tagList.length > activeIndex + 1) {
+          tagList[activeIndex+1].focus();
+        }
+        else if (searchable.value) {
+          tags.value.querySelector('input').focus();
+        }
+        else if (!searchable.value) {
+          multiselect.value.focus();
+        }
+        
         break
     }
   };
@@ -1813,10 +1891,10 @@ function useScroll (props, context, dep)
   // ============ DEPENDENCIES ============
 
   const pointer = dep.pointer;
-  const iv = dep.iv;
-  const isSelected = dep.isSelected;
-  const hasSelected = dep.hasSelected;
-  const multipleLabelText = dep.multipleLabelText;
+  dep.iv;
+  dep.hasSelected;
+  dep.multipleLabelText;
+  dep.isOpen;
 
   // ================ DATA ================
 
@@ -1843,44 +1921,23 @@ function useScroll (props, context, dep)
       texts.push(id.value);
     }
 
-    texts.push('multiselect-option');
+    if (pointer.value) {
+      texts.push(pointer.value.group ? 'multiselect-group' : 'multiselect-option');
 
-    if (pointer.value && pointer.value[valueProp.value] !== undefined) {
-      texts.push(pointer.value[valueProp.value]);
+      texts.push(pointer.value.group ? pointer.value.index : pointer.value[valueProp.value]);
 
       return texts.join('-')
     }
   });
 
-  const ariaLabel = computed(() => {
-    let texts = [];
 
-    /* istanbul ignore next */
-    if (label.value) {
-      texts.push(label.value);
-    }
-
-    if (placeholder.value && !hasSelected.value) {
-      texts.push(placeholder.value);
-    }
-
-    if (mode.value === 'single' && iv.value && iv.value[labelProp.value] !== undefined) {
-      texts.push(iv.value[labelProp.value]);
-    }
-
-    if (mode.value === 'multiple' && hasSelected.value) {
-      texts.push(multipleLabelText.value);
-    }
-
-    if (mode.value === 'tags' && hasSelected.value) {
-      texts.push(...iv.value.map(v => v[labelProp.value]));
-    }
-
-    return texts.join(', ')
-  });
 
   const ariaPlaceholder = computed(() => {
-    return ariaLabel.value
+    return placeholder.value
+  });
+
+  const ariaMultiselectable = computed(() => {
+    return mode.value !== 'single'
   });
 
   // =============== METHODS ==============
@@ -1899,12 +1956,22 @@ function useScroll (props, context, dep)
     return texts.join('-')
   };
 
-  const ariaOptionLabel = (option) => {
+  const ariaGroupId = (option) => {
     let texts = [];
 
-    if (isSelected(option)) {
-      texts.push('✓');
+    if (id && id.value) {
+      texts.push(id.value);
     }
+
+    texts.push('multiselect-group');
+
+    texts.push(option.index);
+
+    return texts.join('-')
+  };
+
+  const ariaOptionLabel = (option) => {
+    let texts = [];
 
     texts.push(option[labelProp.value]);
 
@@ -1919,6 +1986,10 @@ function useScroll (props, context, dep)
     return texts.join(' ')
   };
 
+  const ariaTagLabel = (label) => {
+    return `${label} ❎`
+  };
+
   // =============== HOOKS ================
 
   onMounted(() => {
@@ -1931,12 +2002,14 @@ function useScroll (props, context, dep)
 
   return {
     ariaOwns,
-    ariaLabel,
     ariaPlaceholder,
+    ariaMultiselectable,
     ariaActiveDescendant,
     ariaOptionId,
     ariaOptionLabel,
+    ariaGroupId,
     ariaGroupLabel,
+    ariaTagLabel,
   }
 }
 
@@ -2242,6 +2315,11 @@ function resolveDeps (props, context, features, deps = {}) {
         required: false,
         default: false,
       },
+      aria: {
+        required: false,
+        type: Object,
+        default: () => ({}),
+      },
     },
     setup(props, context)
     { 
@@ -2347,29 +2425,37 @@ var __vue_render__ = function () {
   var _c = _vm._self._c || _h;
   return _c(
     "div",
-    {
-      ref: "multiselect",
-      class: _vm.classList.container,
-      attrs: {
-        tabindex: _vm.tabindex,
-        id: _vm.searchable ? undefined : _vm.id,
-        dir: _vm.rtl ? "rtl" : undefined,
-        "aria-owns": _vm.ariaOwns,
-        "aria-expanded": _vm.isOpen,
-        "aria-label": _vm.ariaLabel,
-        "aria-placeholder": _vm.ariaPlaceholder,
-        "aria-activedescendant": _vm.ariaActiveDescendant,
-        role: "combobox",
+    _vm._b(
+      {
+        ref: "multiselect",
+        class: _vm.classList.container,
+        attrs: {
+          tabindex: _vm.tabindex,
+          id: _vm.searchable ? undefined : _vm.id,
+          dir: _vm.rtl ? "rtl" : undefined,
+          "aria-owns": !_vm.searchable ? _vm.ariaOwns : undefined,
+          "aria-placeholder": !_vm.searchable ? _vm.ariaPlaceholder : undefined,
+          "aria-expanded": !_vm.searchable ? _vm.isOpen : undefined,
+          "aria-activedescendant": !_vm.searchable
+            ? _vm.ariaActiveDescendant
+            : undefined,
+          "aria-multiselectable": !_vm.searchable
+            ? _vm.ariaMultiselectable
+            : undefined,
+          role: !_vm.searchable ? "listbox" : undefined,
+        },
+        on: {
+          focusin: _vm.handleFocusIn,
+          focusout: _vm.handleFocusOut,
+          keydown: _vm.handleKeydown,
+          keyup: _vm.handleKeyup,
+          mousedown: _vm.handleMousedown,
+        },
       },
-      on: {
-        focusin: _vm.activate,
-        focusout: _vm.deactivate,
-        keydown: _vm.handleKeydown,
-        keyup: _vm.handleKeyup,
-        focus: _vm.handleFocus,
-        mousedown: _vm.handleMousedown,
-      },
-    },
+      "div",
+      !_vm.searchable ? _vm.aria : {},
+      false
+    ),
     [
       _vm.mode !== "tags" && _vm.searchable && !_vm.disabled
         ? [
@@ -2385,11 +2471,11 @@ var __vue_render__ = function () {
                     autocomplete: _vm.autocomplete,
                     id: _vm.searchable ? _vm.id : undefined,
                     "aria-owns": _vm.ariaOwns,
-                    "aria-expanded": _vm.isOpen,
-                    "aria-label": _vm.ariaLabel,
                     "aria-placeholder": _vm.ariaPlaceholder,
+                    "aria-expanded": _vm.isOpen,
                     "aria-activedescendant": _vm.ariaActiveDescendant,
-                    role: "combobox",
+                    "aria-multiselectable": _vm.ariaMultiselectable,
+                    role: "listbox",
                   },
                   domProps: { value: _vm.search },
                   on: {
@@ -2402,7 +2488,7 @@ var __vue_render__ = function () {
                   },
                 },
                 "input",
-                _vm.attrs,
+                Object.assign({}, _vm.attrs, _vm.aria),
                 false
               )
             ),
@@ -2413,38 +2499,69 @@ var __vue_render__ = function () {
         ? [
             _c(
               "div",
-              { class: _vm.classList.tags },
+              { class: _vm.classList.tags, attrs: { "data-tags": "" } },
               [
                 _vm._l(_vm.iv, function (option, i, key) {
                   return _vm._t(
                     "tag",
                     function () {
                       return [
-                        _c("span", { key: key, class: _vm.classList.tag }, [
-                          _vm._v(
-                            "\n          " +
-                              _vm._s(option[_vm.label]) +
-                              "\n          "
-                          ),
-                          !_vm.disabled
-                            ? _c(
-                                "span",
-                                {
-                                  class: _vm.classList.tagRemove,
-                                  on: {
-                                    click: function ($event) {
-                                      return _vm.handleTagRemove(option, $event)
+                        _c(
+                          "span",
+                          {
+                            key: key,
+                            class: _vm.classList.tag,
+                            attrs: {
+                              tabindex: "-1",
+                              "aria-label": _vm.ariaTagLabel(option[_vm.label]),
+                            },
+                            on: {
+                              keyup: function ($event) {
+                                if (
+                                  !$event.type.indexOf("key") &&
+                                  _vm._k(
+                                    $event.keyCode,
+                                    "enter",
+                                    13,
+                                    $event.key,
+                                    "Enter"
+                                  )
+                                ) {
+                                  return null
+                                }
+                                return _vm.handleTagRemove(option, $event)
+                              },
+                            },
+                          },
+                          [
+                            _vm._v(
+                              "\n          " +
+                                _vm._s(option[_vm.label]) +
+                                "\n          "
+                            ),
+                            !_vm.disabled
+                              ? _c(
+                                  "span",
+                                  {
+                                    class: _vm.classList.tagRemove,
+                                    on: {
+                                      click: function ($event) {
+                                        return _vm.handleTagRemove(
+                                          option,
+                                          $event
+                                        )
+                                      },
                                     },
                                   },
-                                },
-                                [
-                                  _c("span", {
-                                    class: _vm.classList.tagRemoveIcon,
-                                  }),
-                                ]
-                              )
-                            : _vm._e(),
-                        ]),
+                                  [
+                                    _c("span", {
+                                      class: _vm.classList.tagRemoveIcon,
+                                    }),
+                                  ]
+                                )
+                              : _vm._e(),
+                          ]
+                        ),
                       ]
                     },
                     {
@@ -2476,12 +2593,12 @@ var __vue_render__ = function () {
                                 id: _vm.searchable ? _vm.id : undefined,
                                 autocomplete: _vm.autocomplete,
                                 "aria-owns": _vm.ariaOwns,
-                                "aria-expanded": _vm.isOpen,
-                                "aria-label": _vm.ariaLabel,
                                 "aria-placeholder": _vm.ariaPlaceholder,
+                                "aria-expanded": _vm.isOpen,
                                 "aria-activedescendant":
                                   _vm.ariaActiveDescendant,
-                                role: "combobox",
+                                "aria-multiselectable": _vm.ariaMultiselectable,
+                                role: "listbox",
                               },
                               domProps: { value: _vm.search },
                               on: {
@@ -2494,7 +2611,7 @@ var __vue_render__ = function () {
                               },
                             },
                             "input",
-                            _vm.attrs,
+                            Object.assign({}, _vm.attrs, _vm.aria),
                             false
                           )
                         )
@@ -2513,12 +2630,19 @@ var __vue_render__ = function () {
               "singlelabel",
               function () {
                 return [
-                  _c("div", { class: _vm.classList.singleLabel }, [
-                    _c("span", {
-                      class: _vm.classList.singleLabelText,
-                      domProps: { innerHTML: _vm._s(_vm.iv[_vm.label]) },
-                    }),
-                  ]),
+                  _c(
+                    "div",
+                    {
+                      class: _vm.classList.singleLabel,
+                      attrs: { "aria-hidden": "true" },
+                    },
+                    [
+                      _c("span", {
+                        class: _vm.classList.singleLabelText,
+                        domProps: { innerHTML: _vm._s(_vm.iv[_vm.label]) },
+                      }),
+                    ]
+                  ),
                 ]
               },
               { value: _vm.iv }
@@ -2534,6 +2658,7 @@ var __vue_render__ = function () {
                 return [
                   _c("div", {
                     class: _vm.classList.multipleLabel,
+                    attrs: { "aria-hidden": "true" },
                     domProps: { innerHTML: _vm._s(_vm.multipleLabelText) },
                   }),
                 ]
@@ -2547,9 +2672,14 @@ var __vue_render__ = function () {
         ? [
             _vm._t("placeholder", function () {
               return [
-                _c("div", { class: _vm.classList.placeholder }, [
-                  _vm._v("\n        " + _vm._s(_vm.placeholder) + "\n      "),
-                ]),
+                _c(
+                  "div",
+                  {
+                    class: _vm.classList.placeholder,
+                    attrs: { "aria-hidden": "true" },
+                  },
+                  [_vm._v("\n        " + _vm._s(_vm.placeholder) + "\n      ")]
+                ),
               ]
             }),
           ]
@@ -2557,7 +2687,12 @@ var __vue_render__ = function () {
       _vm._v(" "),
       _vm.loading || _vm.resolving
         ? _vm._t("spinner", function () {
-            return [_c("span", { class: _vm.classList.spinner })]
+            return [
+              _c("span", {
+                class: _vm.classList.spinner,
+                attrs: { "aria-hidden": "true" },
+              }),
+            ]
           })
         : _vm._e(),
       _vm._v(" "),
@@ -2568,7 +2703,32 @@ var __vue_render__ = function () {
               return [
                 _c(
                   "span",
-                  { class: _vm.classList.clear, on: { click: _vm.clear } },
+                  {
+                    class: _vm.classList.clear,
+                    attrs: {
+                      tabindex: "0",
+                      role: "button",
+                      "aria-label": "❎",
+                    },
+                    on: {
+                      click: _vm.clear,
+                      keyup: function ($event) {
+                        if (
+                          !$event.type.indexOf("key") &&
+                          _vm._k(
+                            $event.keyCode,
+                            "enter",
+                            13,
+                            $event.key,
+                            "Enter"
+                          )
+                        ) {
+                          return null
+                        }
+                        return _vm.clear.apply(null, arguments)
+                      },
+                    },
+                  },
                   [_c("span", { class: _vm.classList.clearIcon })]
                 ),
               ]
@@ -2582,6 +2742,7 @@ var __vue_render__ = function () {
             return [
               _c("span", {
                 class: _vm.classList.caret,
+                attrs: { "aria-hidden": "true" },
                 on: { click: _vm.handleCaretClick },
               }),
             ]
@@ -2596,111 +2757,119 @@ var __vue_render__ = function () {
           _vm._v(" "),
           _c(
             "ul",
-            {
-              class: _vm.classList.options,
-              attrs: { id: _vm.ariaOwns, role: "listbox" },
-            },
+            { class: _vm.classList.options, attrs: { id: _vm.ariaOwns } },
             [
               _vm.groups
                 ? _vm._l(_vm.fg, function (group, i, key) {
-                    return _c("li", { key: key, class: _vm.classList.group }, [
-                      _c(
-                        "div",
-                        {
-                          class: _vm.classList.groupLabel(group),
-                          attrs: {
-                            "data-pointed": _vm.isPointed(group),
-                            role: "none",
-                          },
-                          on: {
-                            mouseenter: function ($event) {
-                              return _vm.setPointer(group)
-                            },
-                            click: function ($event) {
-                              return _vm.handleGroupClick(group)
-                            },
-                          },
+                    return _c(
+                      "li",
+                      {
+                        key: key,
+                        class: _vm.classList.group,
+                        attrs: {
+                          id: _vm.ariaGroupId(group),
+                          "aria-label": _vm.ariaGroupLabel(group),
+                          "aria-selected": _vm.isSelected(group),
+                          role: "option",
                         },
-                        [
-                          _vm._t(
-                            "grouplabel",
-                            function () {
-                              return [
-                                _c("span", {
-                                  domProps: {
-                                    innerHTML: _vm._s(group[_vm.groupLabel]),
+                      },
+                      [
+                        _c(
+                          "div",
+                          {
+                            class: _vm.classList.groupLabel(group),
+                            attrs: { "data-pointed": _vm.isPointed(group) },
+                            on: {
+                              mouseenter: function ($event) {
+                                return _vm.setPointer(group, i)
+                              },
+                              click: function ($event) {
+                                return _vm.handleGroupClick(group)
+                              },
+                            },
+                          },
+                          [
+                            _vm._t(
+                              "grouplabel",
+                              function () {
+                                return [
+                                  _c("span", {
+                                    domProps: {
+                                      innerHTML: _vm._s(group[_vm.groupLabel]),
+                                    },
+                                  }),
+                                ]
+                              },
+                              {
+                                group: group,
+                                isSelected: _vm.isSelected,
+                                isPointed: _vm.isPointed,
+                              }
+                            ),
+                          ],
+                          2
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "ul",
+                          {
+                            class: _vm.classList.groupOptions,
+                            attrs: {
+                              "aria-label": _vm.ariaGroupLabel(group),
+                              role: "group",
+                            },
+                          },
+                          _vm._l(group.__VISIBLE__, function (option, i, key) {
+                            return _c(
+                              "li",
+                              {
+                                key: key,
+                                class: _vm.classList.option(option, group),
+                                attrs: {
+                                  "data-pointed": _vm.isPointed(option),
+                                  "data-selected":
+                                    _vm.isSelected(option) || undefined,
+                                  id: _vm.ariaOptionId(option),
+                                  "aria-selected": _vm.isSelected(option),
+                                  "aria-label": _vm.ariaOptionLabel(option),
+                                  role: "option",
+                                },
+                                on: {
+                                  mouseenter: function ($event) {
+                                    return _vm.setPointer(option)
                                   },
-                                }),
-                              ]
-                            },
-                            {
-                              group: group,
-                              isSelected: _vm.isSelected,
-                              isPointed: _vm.isPointed,
-                            }
-                          ),
-                        ],
-                        2
-                      ),
-                      _vm._v(" "),
-                      _c(
-                        "ul",
-                        {
-                          class: _vm.classList.groupOptions,
-                          attrs: {
-                            "aria-label": _vm.ariaGroupLabel(group),
-                            role: "group",
-                          },
-                        },
-                        _vm._l(group.__VISIBLE__, function (option, i, key) {
-                          return _c(
-                            "li",
-                            {
-                              key: key,
-                              class: _vm.classList.option(option, group),
-                              attrs: {
-                                "data-pointed": _vm.isPointed(option),
-                                "data-selected":
-                                  _vm.isSelected(option) || undefined,
-                                id: _vm.ariaOptionId(option),
-                                "aria-label": _vm.ariaOptionLabel(option),
-                                role: "option",
-                              },
-                              on: {
-                                mouseenter: function ($event) {
-                                  return _vm.setPointer(option)
-                                },
-                                click: function ($event) {
-                                  return _vm.handleOptionClick(option)
+                                  click: function ($event) {
+                                    return _vm.handleOptionClick(option)
+                                  },
                                 },
                               },
-                            },
-                            [
-                              _vm._t(
-                                "option",
-                                function () {
-                                  return [
-                                    _c("span", {
-                                      domProps: {
-                                        innerHTML: _vm._s(option[_vm.label]),
-                                      },
-                                    }),
-                                  ]
-                                },
-                                {
-                                  option: option,
-                                  isSelected: _vm.isSelected,
-                                  isPointed: _vm.isPointed,
-                                  search: _vm.search,
-                                }
-                              ),
-                            ],
-                            2
-                          )
-                        }),
-                        0
-                      ),
-                    ])
+                              [
+                                _vm._t(
+                                  "option",
+                                  function () {
+                                    return [
+                                      _c("span", {
+                                        domProps: {
+                                          innerHTML: _vm._s(option[_vm.label]),
+                                        },
+                                      }),
+                                    ]
+                                  },
+                                  {
+                                    option: option,
+                                    isSelected: _vm.isSelected,
+                                    isPointed: _vm.isPointed,
+                                    search: _vm.search,
+                                  }
+                                ),
+                              ],
+                              2
+                            )
+                          }),
+                          0
+                        ),
+                      ]
+                    )
                   })
                 : _vm._l(_vm.fo, function (option, i, key) {
                     return _c(
@@ -2709,10 +2878,11 @@ var __vue_render__ = function () {
                         key: key,
                         class: _vm.classList.option(option),
                         attrs: {
-                          id: _vm.ariaOptionId(option),
-                          "aria-label": _vm.ariaOptionLabel(option),
                           "data-pointed": _vm.isPointed(option),
                           "data-selected": _vm.isSelected(option) || undefined,
+                          id: _vm.ariaOptionId(option),
+                          "aria-selected": _vm.isSelected(option),
+                          "aria-label": _vm.ariaOptionLabel(option),
                           role: "option",
                         },
                         on: {
