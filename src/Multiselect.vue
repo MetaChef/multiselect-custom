@@ -217,7 +217,7 @@
         </template>
         <template v-else>
           <div class="listsimplebar">
-            <SimpleBar class="px-0 py-0 w-full h-full relative overflow-y-auto inline-block pr-4">
+            <SimpleBar ref="scrollView" class="px-0 py-0 w-full h-full relative overflow-y-auto inline-block pr-4">
               <li
                   v-for="(option, i, key) in fo"
                   :class="classList.option(option)"
@@ -289,7 +289,6 @@
   import useScroll from './composables/useScroll' 
   import useA11y from './composables/useA11y'
   import { SimpleBar } from "simplebar-vue3"
-  import "simplebar/dist/simplebar.min.css"
   import resolveDeps from './utils/resolveDeps'
 
   export default {
@@ -300,8 +299,19 @@
     emits: [
       'paste', 'open', 'close', 'select', 'deselect', 
       'input', 'search-change', 'tag', 'option', 'update:modelValue',
-      'change', 'clear', 'keydown', 'keyup',
+      'change', 'clear', 'keydown', 'keyup', 'scrollBottomReached',
     ],
+    mounted() {
+      // Tags scroll - scroll down to load more
+      const scrollHandler = (event) => {
+        const { scrollHeight, scrollTop, clientHeight } = event.target
+        const isBottomReached = (scrollHeight - Math.round(scrollTop) === clientHeight)
+
+        if (isBottomReached)
+          this.$emit("scrollBottomReached")
+      }
+      this.$refs.scrollView.value.getScrollElement().addEventListener("scroll", scrollHandler, { passive: true })
+    },
     props: {
       value: {
         required: false,
