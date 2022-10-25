@@ -167,53 +167,57 @@
 
       <ul :class="classList.options "  style="max-height:15rem;" :id="ariaOwns" role="listbox">
         <template v-if="groups">
-          <li
-            v-for="(group, i, key) in fg"
-            :class="classList.group"
-            :key="key"
-
-            :id="ariaGroupId(group)"
-            :aria-label="ariaGroupLabel(group)"
-            :aria-selected="isSelected(group)"
-            role="option"
-          >
-            <div
-              :class="classList.groupLabel(group)"
-              :data-pointed="isPointed(group)"
-              @mouseenter="setPointer(group, i)"
-              @click="handleGroupClick(group)"
-            >
-              <slot name="grouplabel" :group="group" :is-selected="isSelected" :is-pointed="isPointed">
-                <span v-html="group[groupLabel]"></span>
-              </slot>
-            </div>
-
-            <ul
-              :class="classList.groupOptions"
-              
-              :aria-label="ariaGroupLabel(group)"
-              role="group"
-            >
+          <div class="listsimplebar">
+            <SimpleBar ref="scrollView" class="px-0 py-0 w-full h-full relative overflow-y-auto inline-block pr-4">
               <li
-                v-for="(option, i, key) in group.__VISIBLE__"
-                :class="classList.option(option, group)"
-                :data-pointed="isPointed(option)"
-                :data-selected="isSelected(option) || undefined"
+                v-for="(group, i, key) in fg"
+                :class="classList.group"
                 :key="key"
-                @mouseenter="setPointer(option)"
-                @click="handleOptionClick(option)"
-
-                :id="ariaOptionId(option)"
-                :aria-selected="isSelected(option)"
-                :aria-label="ariaOptionLabel(option)"
+    
+                :id="ariaGroupId(group)"
+                :aria-label="ariaGroupLabel(group)"
+                :aria-selected="isSelected(group)"
                 role="option"
               >
-                <slot name="option" :option="option" :is-selected="isSelected" :is-pointed="isPointed" :search="search">
-                  <span v-html="option[label]"></span>
-                </slot>
+                <div
+                  :class="classList.groupLabel(group)"
+                  :data-pointed="isPointed(group)"
+                  @mouseenter="setPointer(group, i)"
+                  @click="handleGroupClick(group)"
+                >
+                  <slot name="grouplabel" :group="group" :is-selected="isSelected" :is-pointed="isPointed">
+                    <span v-html="group[groupLabel]"></span>
+                  </slot>
+                </div>
+    
+                <ul
+                  :class="classList.groupOptions"
+                  
+                  :aria-label="ariaGroupLabel(group)"
+                  role="group"
+                >
+                  <li
+                    v-for="(option, i, key) in group.__VISIBLE__"
+                    :class="classList.option(option, group)"
+                    :data-pointed="isPointed(option)"
+                    :data-selected="isSelected(option) || undefined"
+                    :key="key"
+                    @mouseenter="setPointer(option)"
+                    @click="handleOptionClick(option)"
+    
+                    :id="ariaOptionId(option)"
+                    :aria-selected="isSelected(option)"
+                    :aria-label="ariaOptionLabel(option)"
+                    role="option"
+                  >
+                    <slot name="option" :option="option" :is-selected="isSelected" :is-pointed="isPointed" :search="search">
+                      <span v-html="option[label]"></span>
+                    </slot>
+                  </li>
+                </ul>
               </li>
-            </ul>
-          </li>
+            </SimpleBar>
+          </div>
         </template>
         <template v-else>
           <div class="listsimplebar">
