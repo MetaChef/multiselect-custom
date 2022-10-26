@@ -1290,7 +1290,7 @@ function useDropdown (props, context, dep)
 
 function useMultiselect (props, context, dep)
 {
-  const { searchable, disabled } = toRefs(props);
+  const { searchable, disabled, clearSearchInput } = toRefs(props);
 
   // ============ DEPENDENCIES ============
 
@@ -1299,6 +1299,7 @@ function useMultiselect (props, context, dep)
   const close = dep.close;
   const clearSearch = dep.clearSearch;
   const isOpen = dep.isOpen;
+  
 
   // ================ DATA ================
 
@@ -1350,7 +1351,9 @@ function useMultiselect (props, context, dep)
     setTimeout(() => {
       if (!isActive.value) {
         close();
-        clearSearch();
+        if (clearSearchInput.value){
+          clearSearch(); 
+        }
       }
     }, 1);
   };
@@ -2105,6 +2108,11 @@ var script = {
         type: Boolean,
         required: false,
         default: false,
+      },
+      clearSearchInput: {
+        type: Boolean,
+        required: false,
+        default: true,
       },
       limit: {
         type: Number,

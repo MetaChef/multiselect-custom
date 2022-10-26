@@ -32,6 +32,7 @@ declare class Multiselect extends Vue {
   appendNewOption?: boolean;
   createTag?: boolean;
   createOption?: boolean;
+  clearSearchInput?: boolean;
   addTagOn?: string[];
   addOptionOn?: string[];
   hideSelected?: boolean;

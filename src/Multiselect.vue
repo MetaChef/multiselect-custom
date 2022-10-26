@@ -372,6 +372,11 @@
         required: false,
         default: false,
       },
+      clearSearchInput: {
+        type: Boolean,
+        required: false,
+        default: true,
+      },
       limit: {
         type: Number,
         required: false,
