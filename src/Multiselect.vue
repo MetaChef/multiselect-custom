@@ -319,6 +319,7 @@
       console.log(this.$refs.scrollView.value.scrollElement)
       console.log(this.$refs.scrollView.value.getScrollElement)
       console.log(this.$refs.scrollView.value.getScrollElement())
+      console.log(this.$refs.scrollView.value.test())
       this.$refs.scrollView.value.getScrollElement().addEventListener("scroll", scrollHandler, { passive: true })
     },
     props: {
