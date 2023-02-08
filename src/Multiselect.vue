@@ -315,8 +315,9 @@
           this.$emit("scrollBottomReached")
       }
       console.log(this.$refs.scrollView)
-      console.log(this.$refs.scrollView.simplebarInstance)
-      console.log(this.$refs.scrollView.simplebarInstance.value)
+      console.log(this.$refs.scrollView.value)
+      console.log(this.$refs.scrollView.value.getScrollElement)
+      console.log(this.$refs.scrollView.value.getScrollElement())
       this.$refs.scrollView.simplebarInstance.value.getScrollElement().addEventListener("scroll", scrollHandler, { passive: true })
     },
     props: {
