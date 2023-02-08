@@ -18,7 +18,7 @@
     "url": "https://github.com/vueform/multiselect/issues"
   },
   "scripts": {
-    "build": "npm run build:vue2; npm run build:vue3; npm run build:themes",
+    "build": "npm run build:vue2 npm run build:vue3 npm run build:themes",
     "build:vue2": "rollup --config build/vue2.rollup.config.js",
     "build:vue3": "rollup --config build/vue3.rollup.config.js",
     "build:themes": "rollup --config build/themes.rollup.config.js",
