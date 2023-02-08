@@ -314,12 +314,6 @@
         if (isBottomReached)
           this.$emit("scrollBottomReached")
       }
-      console.log(this.$refs.scrollView)
-      console.log(this.$refs.scrollView.value)
-      console.log(this.$refs.scrollView.value.scrollElement)
-      console.log(this.$refs.scrollView.value.getScrollElement)
-      console.log(this.$refs.scrollView.value.getScrollElement())
-      console.log(this.$refs.scrollView.value.test())
       this.$refs.scrollView.value.getScrollElement().addEventListener("scroll", scrollHandler, { passive: true })
     },
     props: {
