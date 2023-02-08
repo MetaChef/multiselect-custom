@@ -2053,9 +2053,10 @@ var script = {
       };
       console.log(this.$refs.scrollView);
       console.log(this.$refs.scrollView.value);
+      console.log(this.$refs.scrollView.value.scrollElement);
       console.log(this.$refs.scrollView.value.getScrollElement);
       console.log(this.$refs.scrollView.value.getScrollElement());
-      this.$refs.scrollView.simplebarInstance.value.getScrollElement().addEventListener("scroll", scrollHandler, { passive: true });
+      this.$refs.scrollView.value.getScrollElement().addEventListener("scroll", scrollHandler, { passive: true });
     },
     props: {
       value: {
