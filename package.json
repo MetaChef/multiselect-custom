@@ -18,7 +18,7 @@
     "url": "https://github.com/vueform/multiselect/issues"
   },
   "scripts": {
-    "build": "npm run build:vue2 npm run build:vue3 npm run build:themes",
+    "build": "npm run build:vue3 && npm run build:themes",
     "build:vue2": "rollup --config build/vue2.rollup.config.js",
     "build:vue3": "rollup --config build/vue3.rollup.config.js",
     "build:themes": "rollup --config build/themes.rollup.config.js",
@@ -57,7 +57,7 @@
     "vue-prev-jest": "npm:@vue/vue2-jest@^27.0.0-alpha.2",
     "vue-prev-rollup-plugin-vue": "npm:rollup-plugin-vue@^5.1.9",
     "vue-prev-test-utils": "npm:@vue/test-utils@1.2.2",
-    "vue-template-compiler": "^2.7.8"
+    "vue-template-compiler": "^2.7.14"
   },
   "browserslist": [
     "> 1%",
