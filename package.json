@@ -24,7 +24,8 @@
     "build:themes": "rollup --config build/themes.rollup.config.js",
     "test": "jest --config=jest/jest.config.vue3.js; jest --config=jest/jest.config.vue2.js;",
     "test:vue2": "jest --verbose --config=jest/jest.config.vue2.js",
-    "test:vue3": "jest --verbose --config=jest/jest.config.vue3.js"
+    "test:vue3": "jest --verbose --config=jest/jest.config.vue3.js",
+    "prepare": "npm run build"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",
