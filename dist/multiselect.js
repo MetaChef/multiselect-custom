@@ -2051,6 +2051,7 @@ var script = {
         if (isBottomReached)
           this.$emit("scrollBottomReached");
       };
+      console.log(this.$refs.scrollView)
       this.$refs.scrollView.value.getScrollElement().addEventListener("scroll", scrollHandler, { passive: true });
     },
     props: {
