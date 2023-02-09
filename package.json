@@ -65,7 +65,7 @@
     "not dead"
   ],
   "dependencies": {
-    "simplebar": "6.2.0",
+    "simplebar": "5.3.6",
     "simplebar-vue3": "https://github.com/MetaChef/simplebar-vue3-custom.git"
   }
 }
