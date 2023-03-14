@@ -9,7 +9,7 @@
     @focusout="handleFocusOut"
     @keydown="handleKeydown"
     @keyup="handleKeyup"
-    @mousedown="handleMousedown"
+    @mousedown="handleMousedown($event); $refs.input?.focus()"
 
     :aria-owns="!searchable ? ariaOwns : undefined"
     :aria-placeholder="!searchable ? ariaPlaceholder : undefined"
